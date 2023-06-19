@@ -1,0 +1,36 @@
+version: '3'
+
+networks:
+    mysql-pma-network:
+        driver: bridge
+
+services:
+    mysql-server:
+        image: mysql:8
+        environment:
+            MYSQL_ROOT_PASSWORD: badpassword
+            MYSQL_DATABASE: mydatabase
+            MYSQL_USER: db_username
+            MYSQL_PASSWORD: db_password
+        networks:
+            - mysql-pma-network
+
+    phpmyadmin:
+        depends_on:
+            - mysql-server
+        build: mysql
+        ports:
+            - 8081:80
+        environment:
+            PMA_HOST: mysql-server
+        networks:
+            - mysql-pma-network
+
+    apache-server:
+        build: ./
+        ports:
+            - 8080:80
+        volumes:
+            - .:/var/www/html
+        networks:
+            - mysql-pma-network
